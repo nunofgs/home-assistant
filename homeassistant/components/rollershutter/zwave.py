@@ -12,8 +12,8 @@ from homeassistant.components.zwave import ZWaveDeviceEntity
 from homeassistant.components import zwave
 from homeassistant.components.rollershutter import RollershutterDevice
 
-COMMAND_CLASS_SWITCH_MULTILEVEL = 38  # 0x26
-COMMAND_CLASS_SWITCH_BINARY = 37  # 0x25
+COMMAND_CLASS_SWITCH_MULTILEVEL = 0x26  # 38
+COMMAND_CLASS_SWITCH_BINARY = 0x25  # 37
 
 _LOGGER = logging.getLogger(__name__)
 
