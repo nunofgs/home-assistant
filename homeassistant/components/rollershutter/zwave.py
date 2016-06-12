@@ -4,12 +4,18 @@ Support for Zwave roller shutter components.
 For more details about this platform, please refer to the documentation
 https://home-assistant.io/components/rollershutter.zwave/
 """
-
+# Because we do not compile openzwave on CI
+# pylint: disable=import-error
+import logging
+from homeassistant.components.rollershutter import DOMAIN
+from homeassistant.components.zwave import ZWaveDeviceEntity
 from homeassistant.components import zwave
 from homeassistant.components.rollershutter import RollershutterDevice
 
 COMMAND_CLASS_SWITCH_MULTILEVEL = 38  # 0x26
 COMMAND_CLASS_SWITCH_BINARY = 37  # 0x25
+
+_LOGGER = logging.getLogger(__name__)
 
 
 def setup_platform(hass, config, add_devices, discovery_info=None):
@@ -30,6 +36,21 @@ def setup_platform(hass, config, add_devices, discovery_info=None):
 class ZwaveRollershutter(zwave.ZWaveDeviceEntity, RollershutterDevice):
     """Representation of an Zwave roller shutter."""
 
+    def __init__(self, value):
+        """Initialize the zwave rollershutter."""
+        from openzwave.network import ZWaveNetwork
+        from pydispatch import dispatcher
+        ZWaveDeviceEntity.__init__(self, value, DOMAIN)
+        self._node = value.node
+        dispatcher.connect(
+            self.value_changed, ZWaveNetwork.SIGNAL_VALUE_CHANGED)
+
+    def value_changed(self, value):
+        """Called when a value has changed on the network."""
+        if self._value.node == value.node:
+            self.update_ha_state(True)
+            _LOGGER.debug("Value changed on network %s", value)
+
     @property
     def should_poll(self):
         """No polling available in Zwave roller shutter."""
@@ -37,25 +58,25 @@ class ZwaveRollershutter(zwave.ZWaveDeviceEntity, RollershutterDevice):
 
     @property
     def current_position(self):
-        """Gives current position of Zwave roller shutter."""
+        """Return the current position of Zwave roller shutter."""
         return None
 
     def move_up(self, **kwargs):
         """Move the roller shutter up."""
-        for _, value in self._node.get_values(
-                   class_id=COMMAND_CLASS_SWITCH_MULTILEVEL).values():
-                if value.command_class == 38 and value.index == 1:
-                    value.data = True
+        for value in self._node.get_values(
+                class_id=COMMAND_CLASS_SWITCH_MULTILEVEL).values():
+            if value.command_class == 38 and value.index == 1:
+                value.data = True
 
     def move_down(self, **kwargs):
         """Move the roller shutter down."""
-        for _, value in self._node.get_values(
-                   class_id=COMMAND_CLASS_SWITCH_MULTILEVEL).values():
-                if value.command_class == 38 and value.index == 2:
-                    value.data = True
+        for value in self._node.get_values(
+                class_id=COMMAND_CLASS_SWITCH_MULTILEVEL).values():
+            if value.command_class == 38 and value.index == 2:
+                value.data = True
 
     def stop(self, **kwargs):
         """Stop the roller shutter."""
-        for _, value in self._node.get_values(
-                   class_id=COMMAND_CLASS_SWITCH_BINARY).values():
-                value.data = False
+        for value in self._node.get_values(
+                class_id=COMMAND_CLASS_SWITCH_BINARY).values():
+            value.data = False
