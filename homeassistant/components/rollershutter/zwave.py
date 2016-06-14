@@ -65,15 +65,15 @@ class ZwaveRollershutter(zwave.ZWaveDeviceEntity, RollershutterDevice):
         """Move the roller shutter up."""
         for value in self._node.get_values(
                 class_id=COMMAND_CLASS_SWITCH_MULTILEVEL).values():
-            if value.command_class == 38 and value.index == 1:
-                value.data = True
+            if value.command_class == 38 and value.index == 0:
+                value.data = 255
 
     def move_down(self, **kwargs):
         """Move the roller shutter down."""
         for value in self._node.get_values(
                 class_id=COMMAND_CLASS_SWITCH_MULTILEVEL).values():
-            if value.command_class == 38 and value.index == 2:
-                value.data = True
+            if value.command_class == 38 and value.index == 0:
+                value.data = 0
 
     def stop(self, **kwargs):
         """Stop the roller shutter."""
