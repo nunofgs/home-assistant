@@ -28,7 +28,7 @@ def setup_platform(hass, config, add_devices, discovery_info=None):
 
     if value.command_class != zwave.COMMAND_CLASS_SWITCH_MULTILEVEL:
         return
-    if value.index != 0
+    if value.index != 0:
         return
 
     value.set_change_verified(False)
