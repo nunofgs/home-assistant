@@ -62,7 +62,7 @@ class ZwaveRollershutter(zwave.ZWaveDeviceEntity, RollershutterDevice):
     def current_position(self):
         """Return the current position of Zwave roller shutter."""
         for value in self._node.get_values(
-                class_id=COMMAND_CLASS_SWITCH_MULTILEVEL).values:
+                class_id=COMMAND_CLASS_SWITCH_MULTILEVEL).values():
             if value.command_class == 38 and value.index == 0:
                 return value.data
 
