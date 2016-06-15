@@ -54,6 +54,12 @@ class ZwaveRollershutter(zwave.ZWaveDeviceEntity, RollershutterDevice):
             _LOGGER.debug("Value changed on network %s", value)
 
     @property
+    def name(self):
+        """Return the name of the device."""
+        return "{} {}".format(
+            node.manufacturer_name, node.product_name)
+
+    @property
     def should_poll(self):
         """No polling available in Zwave roller shutter."""
         return False
