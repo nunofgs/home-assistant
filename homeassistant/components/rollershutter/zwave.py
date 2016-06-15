@@ -28,7 +28,7 @@ def setup_platform(hass, config, add_devices, discovery_info=None):
 
     if value.command_class != zwave.COMMAND_CLASS_SWITCH_MULTILEVEL:
         return
-    if value.index != 0:
+    if value.index != 1:
         return
 
     value.set_change_verified(False)
@@ -81,4 +81,6 @@ class ZwaveRollershutter(zwave.ZWaveDeviceEntity, RollershutterDevice):
         """Stop the roller shutter."""
         for value in self._node.get_values(
                 class_id=COMMAND_CLASS_SWITCH_BINARY).values():
-            value.data = False
+            # This binary switch will toggle between UP (true), DOWN (False).
+            # It also stops the shutter if sent the same value while the shutter is moving.
+            value.data = value.data
