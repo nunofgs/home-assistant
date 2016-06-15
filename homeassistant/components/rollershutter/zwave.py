@@ -61,7 +61,10 @@ class ZwaveRollershutter(zwave.ZWaveDeviceEntity, RollershutterDevice):
     @property
     def current_position(self):
         """Return the current position of Zwave roller shutter."""
-        return None
+        for value in self._node.get_values(
+                class_id=COMMAND_CLASS_SWITCH_MULTILEVEL).values:
+            if value.command_class == 38 and value.index == 0:
+                return value.data
 
     def move_up(self, **kwargs):
         """Move the roller shutter up."""
@@ -81,6 +84,6 @@ class ZwaveRollershutter(zwave.ZWaveDeviceEntity, RollershutterDevice):
         """Stop the roller shutter."""
         for value in self._node.get_values(
                 class_id=COMMAND_CLASS_SWITCH_BINARY).values():
-            # This binary switch will toggle between UP (true), DOWN (False).
-            # It also stops the shutter if sent the same value while the shutter is moving.
+            # Rollershutter will toggle between UP (True), DOWN (False).
+            # It also stops the shutter if the same value is sent while moving.
             value.data = value.data
