@@ -71,21 +71,39 @@ class UnifiScanner(DeviceScanner):
     def __init__(self, controller):
         """Initialize the scanner."""
         self._controller = controller
-        self._update()
+        self._updateDeviceNames()
+        self._updateClients()
 
-    def _update(self):
-        """Get the clients from the device."""
+    def _updateDevices(self):
+        """Get the devices from the controller."""
+        try:
+            devices = self._controller.get_aps()
+        except urllib.error.HTTPError as ex:
+            _LOGGER.error('Failed to retrieve aps: %s', ex)
+
+        self._devices = {device['mac']: ap.get('name') for device in devices}
+
+    def _updateClients(self):
+        """Get the clients from the controller."""
         try:
             clients = self._controller.get_clients()
         except urllib.error.HTTPError as ex:
             _LOGGER.error('Failed to scan clients: %s', ex)
             clients = []
 
+        for client in clients:
+            device = self._devices[client['ap_mac']]
+            zone = hass.states.get("zone.{}".format(slugify(device)))
+
+            # Report client as seen inside zone, if it exists.
+            if zone is not None:
+                see(mac: client['mac'], location_name: zone['name']);
+
         self._clients = {client['mac']: client for client in clients}
 
     def scan_devices(self):
         """Scan for devices."""
-        self._update()
+        self._updateClients()
         return self._clients.keys()
 
     def get_device_name(self, mac):
